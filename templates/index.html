@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>न्याय साथी</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}" />
+</head>
+<body>
+    <div class="shell">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-top">
+                <div class="hamburger" id="sidebarToggle" data-tooltip="Expand Menu">
+                    <span></span><span></span><span></span>
+                </div>
+                <a class="new-chat-icon-btn" id="newChatBtn" data-tooltip="New Chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
+                    <span class="sidebar-nav-label">New Chat</span>
+                </a>
+                <div class="search-wrapper" id="searchWrapper">
+                    <button class="search-icon-btn" id="searchBtn" data-tooltip="Search Chats">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                        <span class="sidebar-nav-label">Search</span>
+                    </button>
+                    <input class="sidebar-search-input" id="searchInput" type="text" placeholder="Search chats…" autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="sidebar-scroll" id="sidebarScroll">
+                <div class="sidebar-section" id="pinnedSection" style="display:none;">
+                    <div class="sidebar-chats-label">Pinned</div>
+                    <div id="pinnedList"></div>
+                </div>
+                <div class="sidebar-section" id="chatsSection">
+                    <div class="sidebar-chats-label">Chats</div>
+                    <div id="chatList"></div>
+                </div>
+            </div>
+
+            <div class="sidebar-bottom">
+                {% if user %}
+                <button class="settings-btn" id="logoutBtn" data-tooltip="Logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span class="sidebar-nav-label">Logout ({{ user.username }})</span>
+                </button>
+                {% else %}
+                <a class="settings-btn" href="{{ url_for('login_page') }}" data-tooltip="Login">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                        <polyline points="10 17 15 12 10 7" />
+                        <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    <span class="sidebar-nav-label">Login</span>
+                </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+
+            <header class="topbar">
+                <div class="topbar-brand">
+                    <div class="topbar-name">
+                        <span class="brand-line1">न्याय</span>
+                        <span class="brand-line2">साथी</span>
+                    </div>
+                </div>
+
+                <div class="chat-title" id="chatTitle" style="display:none;">
+                    <span id="chatTitleText"></span>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-actions" id="topbarActions" style="display:none;">
+                        <button class="topbar-icon-btn" id="topbarShareBtn" data-tooltip="Share">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
+                        </button>
+                        <div class="topbar-menu-wrap">
+                            <button class="topbar-icon-btn" id="menuToggleBtn" data-tooltip="More">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.2" fill="currentColor" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /><circle cx="12" cy="19" r="1.2" fill="currentColor" /></svg>
+                            </button>
+                            <div class="chat-menu" id="chatMenu">
+                                <button class="chat-menu-item" id="topbarPinBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z" /></svg>
+                                    <span id="topbarPinLabel">Pin</span>
+                                </button>
+                                <button class="chat-menu-item" id="topbarRenameBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                    Rename
+                                </button>
+                                <button class="chat-menu-item" id="topbarDeleteBtn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>
+                                    Delete chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Home state -->
+            <div class="content" id="homeContent">
+                <div class="greeting">
+                    <div style="display:flex; align-items:baseline; gap:8px;">
+                        <span class="greeting-text">नमस्कार</span>
+                        <span class="greeting-name">{% if user %}{{ user.username }}{% else %}Guest{% endif %}</span>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <div class="chat-form">
+                        <textarea class="chat-input" id="homeInput" rows="1"
+                                  placeholder="Ask Nyayasathi" autocomplete="off" autofocus></textarea>
+                        <button class="send-btn" id="homeSendBtn" data-tooltip="Send">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat state -->
+            <div class="messages" id="messages" style="display:none;"></div>
+            <div class="chat-input-area" id="chatInputArea" style="display:none;">
+                <div class="chat-form">
+                    <textarea class="chat-input" id="chatInput" rows="1"
+                              placeholder="Ask a legal question…" autocomplete="off"></textarea>
+                    <button class="send-btn" id="sendBtn" data-tooltip="Send">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                    </button>
+                </div>
+                <p class="disclaimer">Nyayasathi provides legal information, not legal advice. Always consult a qualified advocate.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Tree Panel (placeholder for future implementation) -->
+    <div class="tree-panel" id="treePanel">
+        <div class="tree-panel-header">
+            <div class="tree-panel-header-left">
+                <span class="tree-panel-label">Law Tree Navigator</span>
+                <span class="tree-panel-doc-name" id="treePanelDocName"></span>
+            </div>
+            <button class="tree-panel-close" id="treePanelClose">✕</button>
+        </div>
+        <div class="tree-breadcrumb" id="treeBreadcrumb"></div>
+        <div class="tree-node-info" id="treeNodeInfo"></div>
+        <div class="tree-svg-label">Tree Context</div>
+        <div class="tree-svg-area" id="treeSvgArea"></div>
+    </div>
+
+    <div id="menuOverlay"></div>
+    <div class="custom-tooltip" id="globalTooltip"></div>
+    <script>
+        var currentUser = {% if user %}{"id": {{ user.id }}, "username": "{{ user.username }}"}{% else %}null{% endif %};
+        var chatHistory = [];
+        var isLoading = false;
+        var inChatMode = false;
+        var activeChatId = null;
+        var savedChats = [];
+
+        var homeContent = document.getElementById('homeContent');
+        var messagesEl = document.getElementById('messages');
+        var chatInputArea = document.getElementById('chatInputArea');
+        var homeInput = document.getElementById('homeInput');
+        var chatInput = document.getElementById('chatInput');
+        var sendBtn = document.getElementById('sendBtn');
+        var homeSendBtn = document.getElementById('homeSendBtn');
+        var sidebar = document.getElementById('sidebar');
+        var sidebarToggle = document.getElementById('sidebarToggle');
+        var chatTitle = document.getElementById('chatTitle');
+        var chatTitleText = document.getElementById('chatTitleText');
+        var topbarActions = document.getElementById('topbarActions');
+        var chatMenu = document.getElementById('chatMenu');
+        var tooltipEl = document.getElementById('globalTooltip');
+        var menuOverlay = document.getElementById('menuOverlay');
+        var pinnedSection = document.getElementById('pinnedSection');
+        var pinnedList = document.getElementById('pinnedList');
+        var chatList = document.getElementById('chatList');
+
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function truncate(s, n) { s = s || ''; return s.length > n ? s.substring(0, n) + '…' : s; }
+
+        // Load sessions from server
+        if (currentUser) {
+            loadSessionsFromServer();
+        }
+
+        async function loadSessionsFromServer() {
+            try {
+                var res = await fetch('/Chat/Sessions');
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                if (!res.ok) return;
+                var data = await res.json();
+                savedChats = (data.sessions.pinned || []).concat(data.sessions.unpinned || []);
+                renderChatList();
+            } catch (e) {
+                console.error('Failed to load sessions:', e);
+            }
+        }
+
+        sidebarToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('expanded');
+            sidebarToggle.dataset.tooltip = sidebar.classList.contains('expanded') ? 'Collapse Menu' : 'Expand Menu';
+        });
+
+        document.getElementById('newChatBtn').addEventListener('click', newChat);
+
+        // Logout handler
+        var logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                try {
+                    await fetch('/auth/logout', { method: 'POST' });
+                    window.location.href = '/';
+                } catch (e) {
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        homeSendBtn.addEventListener('click', startChat);
+        homeInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); startChat(); }
+        });
+        homeInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+            homeSendBtn.style.color = this.value.trim() ? 'var(--accent-green)' : '';
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+        chatInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+            updateSendBtn();
+        });
+
+        document.getElementById('menuToggleBtn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            chatMenu.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function () { chatMenu.classList.remove('open'); });
+        chatMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+        menuOverlay.addEventListener('click', function () { chatMenu.classList.remove('open'); });
+
+        // Chat menu handlers
+        document.getElementById('topbarPinBtn').addEventListener('click', function () {
+            chatMenu.classList.remove('open');
+            if (activeChatId) togglePin(activeChatId);
+        });
+
+        document.getElementById('topbarRenameBtn').addEventListener('click', function () {
+            chatMenu.classList.remove('open');
+            if (activeChatId) doRename(activeChatId);
+        });
+
+        document.getElementById('topbarDeleteBtn').addEventListener('click', function () {
+            chatMenu.classList.remove('open');
+            if (!activeChatId) return;
+            var chat = savedChats.find(function (c) { return c.id === activeChatId; });
+            if (chat && confirm('Delete "' + chat.title + '"?')) {
+                deleteChat(activeChatId);
+            }
+        });
+
+        function renderChatList() {
+            var pinned = savedChats.filter(function (c) { return c.is_pinned; });
+            var unpinned = savedChats.filter(function (c) { return !c.is_pinned; });
+
+            pinnedSection.style.display = pinned.length ? '' : 'none';
+            pinnedList.innerHTML = pinned.length ? buildRows(pinned, true) : '';
+            chatList.innerHTML = unpinned.length ? buildRows(unpinned, false) : '';
+
+            attachRowHandlers(pinnedList);
+            attachRowHandlers(chatList);
+        }
+
+        function buildRows(chats, isPinned) {
+            return chats.map(function (c) {
+                var isActive = c.id === activeChatId;
+                return '<div class="chat-history-row' + (isActive ? ' active' : '') + '" data-id="' + c.id + '">' +
+                    '<button class="chat-history-item" data-id="' + c.id + '">' + escHtml(c.title) + '</button>' +
+                    '</div>';
+            }).join('');
+        }
+
+        function attachRowHandlers(container) {
+            container.querySelectorAll('.chat-history-item').forEach(function (btn) {
+                btn.addEventListener('click', function () { loadChat(this.dataset.id); });
+            });
+        }
+
+        async function togglePin(id) {
+            var c = savedChats.find(function (x) { return x.id === id; });
+            if (!c) return;
+            try {
+                await fetch('/Chat/Sessions/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isPinned: !c.is_pinned })
+                });
+                c.is_pinned = !c.is_pinned;
+                renderChatList();
+            } catch (e) { console.error('Pin failed', e); }
+        }
+
+        async function doRename(id) {
+            var c = savedChats.find(function (x) { return x.id === id; });
+            if (!c) return;
+            var n = prompt('Rename chat:', c.title);
+            if (!n || !n.trim()) return;
+            try {
+                await fetch('/Chat/Sessions/' + id, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: n.trim() })
+                });
+                c.title = n.trim();
+                if (id == activeChatId) setChatTitle(c.title);
+                renderChatList();
+            } catch (e) { console.error('Rename failed', e); }
+        }
+
+        async function deleteChat(id) {
+            try {
+                await fetch('/Chat/Sessions/' + id, { method: 'DELETE' });
+                savedChats = savedChats.filter(function (c) { return c.id !== id; });
+                if (id == activeChatId) newChat();
+                else renderChatList();
+            } catch (e) { console.error('Delete failed', e); }
+        }
+
+        function newChat() {
+            activeChatId = null;
+            chatHistory = [];
+            inChatMode = false;
+            messagesEl.style.display = 'none';
+            chatInputArea.style.display = 'none';
+            chatTitle.style.display = 'none';
+            topbarActions.style.display = 'none';
+            messagesEl.innerHTML = '';
+            chatInput.value = '';
+            homeInput.value = '';
+            homeContent.style.display = 'flex';
+            homeInput.focus();
+        }
+
+        function startChat() {
+            var q = homeInput.value.trim();
+            if (!q) return;
+            homeInput.value = '';
+            homeInput.style.height = 'auto';
+            switchToChatMode();
+            activeChatId = null;
+            setChatTitle(q);
+            setTimeout(function () { doSend(q); }, 380);
+        }
+
+        function switchToChatMode() {
+            if (inChatMode) return;
+            inChatMode = true;
+            homeContent.style.display = 'none';
+            messagesEl.style.display = 'flex';
+            chatInputArea.style.display = 'block';
+            chatTitle.style.display = 'block';
+            topbarActions.style.display = 'flex';
+            chatInput.focus();
+        }
+
+        function setChatTitle(text) {
+            chatTitleText.textContent = text.length > 45 ? text.substring(0, 45) + '…' : text;
+        }
+
+        function sendMessage() {
+            var q = chatInput.value.trim();
+            if (!q || isLoading) return;
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            doSend(q);
+        }
+
+        function doSend(query) {
+            isLoading = true;
+            updateSendBtn();
+            appendMessage('user', query, null);
+
+            var wrap = document.createElement('div');
+            wrap.className = 'message message-assistant';
+            wrap.innerHTML = '<div class="bubble loading-bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+            messagesEl.appendChild(wrap);
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+            var endpoint = currentUser ? '/Chat/Stream' : '/api/chat';
+            var body = currentUser 
+                ? JSON.stringify({ query: query, history: chatHistory, sessionId: activeChatId })
+                : JSON.stringify({ query: query, history: chatHistory });
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: body
+            }).then(function (res) {
+                return res.json();
+            }).then(function (data) {
+                if (data.error) {
+                    if (data.error.includes('Please sign in')) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    wrap.innerHTML = '<div class="bubble bubble-error">⚠️ ' + escHtml(data.error) + '</div>';
+                    return;
+                }
+
+                if (currentUser && data.sessionId) {
+                    activeChatId = data.sessionId;
+                    var existing = savedChats.find(function (c) { return c.id === activeChatId; });
+                    if (!existing) {
+                        savedChats.unshift({
+                            id: activeChatId,
+                            title: query.length > 50 ? query.substring(0, 50) + '…' : query,
+                            is_pinned: false,
+                            messages: []
+                        });
+                        renderChatList();
+                    }
+                }
+
+                var fullText = data.answer || 'No response';
+                chatHistory.push({ role: 'user', content: query });
+                chatHistory.push({ role: 'assistant', content: fullText });
+
+                wrap.innerHTML = '<div class="bubble"></div>';
+                var bubble = wrap.querySelector('.bubble');
+                bubble.innerHTML = formatContent(fullText);
+
+                if (data.sources && data.sources.length > 0) {
+                    var src = document.createElement('div');
+                    src.className = 'sources';
+                    src.innerHTML = '<span class="sources-label">Sources</span>';
+                    data.sources.forEach(function (s) {
+                        var chip = document.createElement('div');
+                        chip.className = 'source-chip';
+                        chip.innerHTML = '<span class="source-ref">' + escHtml(s.section || s.rank || '') + '</span> <span>' + escHtml(truncate(s.text || s.preview || '', 38)) + '</span>';
+                        src.appendChild(chip);
+                    });
+                    wrap.appendChild(src);
+                }
+            }).catch(function (err) {
+                wrap.innerHTML = '<div class="bubble bubble-error">⚠️ ' + escHtml(err.message || 'Something went wrong.') + '</div>';
+            }).finally(function () {
+                isLoading = false;
+                updateSendBtn();
+                chatInput.focus();
+            });
+        }
+
+        function appendMessage(role, content, sources) {
+            var wrap = document.createElement('div');
+            wrap.className = 'message message-' + role;
+            var bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = formatContent(content);
+            wrap.appendChild(bubble);
+            messagesEl.appendChild(wrap);
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function formatContent(text) {
+            return escHtml(text)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function updateSendBtn() {
+            sendBtn.disabled = isLoading || !chatInput.value.trim();
+            sendBtn.style.color = (!isLoading && chatInput.value.trim()) ? 'var(--accent-green)' : '';
+        }
+
+        document.querySelectorAll('[data-tooltip]').forEach(function (el) {
+            el.addEventListener('mouseenter', function () {
+                var rect = this.getBoundingClientRect();
+                tooltipEl.textContent = this.dataset.tooltip;
+                tooltipEl.style.top = (rect.bottom + 8) + 'px';
+                tooltipEl.style.left = (rect.left + rect.width / 2) + 'px';
+                tooltipEl.classList.add('visible');
+            });
+            el.addEventListener('mouseleave', function () { tooltipEl.classList.remove('visible'); });
+        });
+
+        // Load chat session if exists
+        async function loadChat(id) {
+            if (!currentUser) return;
+            var numId = parseInt(id, 10);
+            var c = savedChats.find(function (x) { return x.id === numId; });
+            if (!c) return;
+
+            activeChatId = c.id;
+            setChatTitle(c.title);
+            renderChatList();
+            messagesEl.innerHTML = '';
+
+            if (!inChatMode) switchToChatMode();
+
+            // Load messages from server
+            try {
+                var res = await fetch('/Chat/Sessions/' + numId);
+                if (res.status === 401) return;
+                var data = await res.json();
+                
+                chatHistory = [];
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(function (m) {
+                        appendMessage(m.role, m.content, m.sources);
+                        chatHistory.push({ role: m.role, content: m.content });
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load session:', e);
+            }
+        }
+    </script>
+</body>
+</html>

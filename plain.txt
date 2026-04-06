@@ -1,0 +1,9 @@
+project/
+├── code_chunks.json
+├── manual_vectors.json
+├── pdf.py
+├── build_vector_store.py
+├── legal_rag_manual.py
+├── app.py
+├── requirements.txt
+└── .env
