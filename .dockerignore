@@ -1,4 +1,45 @@
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv
+env
+.venv
+
+# Git
+.git
+.gitignore
+
+# Environment variables
 .env
-__pycache__/
+
+# Database backups
+*.db
+*.sqlite3
+*.sql
+backup.sql
+
+# Upload folders
+uploads
+media
+data
+
+# Logs
+*.log
+
+# Node modules (if any frontend)
+node_modules
+
+# IDE files
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
 Muluki civil code.pdf
 मुलुकी देवानी संहिता ऐन.pdf
