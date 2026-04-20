@@ -1,45 +1,7 @@
-# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Virtual environment
-venv/
-env/
-.venv/
-
-# Environment variables
 .env
-
-# Logs
-*.log
-
-# Database files (VERY IMPORTANT)
-*.db
-*.sqlite3
-*.sql
-backup.sql
-
-# Uploads / user files
-uploads/
-media/
-data/
-
-# IDEs
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Node (if any frontend exists)
-node_modules/
-
-# Docker
-Dockerfile
-docker-compose.yml
-
 Muluki civil code.pdf
 मुलुकी देवानी संहिता ऐन.pdf
+
+*.db
+*.sql
